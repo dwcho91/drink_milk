@@ -3,42 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[MALONG]Drink Milk</title>
+  <title>말롱이</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background: #fff6f0;
       overflow: hidden;
+      height: 100%;
     }
     canvas {
       display: block;
       margin: 0 auto;
       background: #ffebcc;
-      image-rendering: pixelated;
-      touch-action: manipulation;
+      image-rendering: auto;
       width: 100%;
       height: auto;
+      max-width: 480px;
     }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="160" height="240"></canvas>
+  <canvas id="gameCanvas" width="320" height="480"></canvas>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
     const Drinkmilk_baby = new Image();
-    Drinkmilk_baby.src = "Drinkmilk_baby.png"; // 아기 이미지 파일명
+    Drinkmilk_baby.src = "Drinkmilk_baby.png";
 
     const Drinkmilk_mom = new Image();
-    Drinkmilk_mom.src = "Drinkmilk_mom.png"; // 엄마 이미지 파일명
+    Drinkmilk_mom.src = "Drinkmilk_mom.png";
 
     const milk = {
-      x: 70,
-      y: 200,
-      w: 20,
-      h: 20,
+      x: 140,
+      y: 400,
+      w: 40,
+      h: 40,
       isPonging: false
     };
 
@@ -46,14 +47,14 @@
     let gameOver = false;
     let score = 0;
     let lives = 3;
-    let pongZone = { y: 180, h: 20 };
+    let pongZone = { y: 360, h: 20 };
 
     const mom = {
-      x: -40,
+      x: -60,
       y: pongZone.y,
-      w: 30,
-      h: 20,
-      vx: 20,
+      w: 60,
+      h: 40,
+      vx: 25,
       active: false
     };
 
@@ -62,20 +63,20 @@
       score = 0;
       lives = 3;
       gameOver = false;
-      milk.y = 200;
+      milk.y = 400;
       milk.isPonging = false;
       mom.active = false;
-      mom.x = -40;
+      mom.x = -60;
     }
 
     function spawnApple() {
       const isGood = Math.random() < 0.4;
-      const speed = 1 + Math.random() * 2.5;
+      const speed = 1 + Math.random() * 2;
       apples.push({
-        x: 75,
+        x: 150,
         y: 0,
-        w: 12,
-        h: 12,
+        w: 20,
+        h: 20,
         speed,
         ponged: false,
         type: isGood ? "good" : "bad"
@@ -84,7 +85,6 @@
 
     function update() {
       if (gameOver) return;
-
       if (Math.random() < 0.02) spawnApple();
 
       for (let apple of apples) {
@@ -95,7 +95,7 @@
         mom.x += mom.vx;
         if (mom.x > canvas.width) {
           mom.active = false;
-          mom.x = -40;
+          mom.x = -60;
         }
       }
 
@@ -149,7 +149,6 @@
       ctx.fillStyle = "#ffebcc";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 아기 그리기
       if (Drinkmilk_baby.complete) {
         ctx.drawImage(Drinkmilk_baby, milk.x, milk.y, milk.w, milk.h);
       } else {
@@ -162,7 +161,6 @@
         ctx.fillRect(apple.x, apple.y, apple.w, apple.h);
       }
 
-      // 엄마 캐릭터 그리기
       if (mom.active) {
         if (Drinkmilk_mom.complete) {
           ctx.drawImage(Drinkmilk_mom, mom.x, mom.y, mom.w, mom.h);
@@ -173,15 +171,15 @@
       }
 
       ctx.fillStyle = "#333";
-      ctx.font = "10px monospace";
+      ctx.font = "14px monospace";
       ctx.fillText(`Score: ${score}`, 10, 20);
-      ctx.fillText(`Lives: ${lives}`, 10, 35);
+      ctx.fillText(`Lives: ${lives}`, 10, 40);
 
       if (gameOver) {
         ctx.fillStyle = "#d32f2f";
-        ctx.font = "12px monospace";
-        ctx.fillText("GAME OVER", 40, 110);
-        ctx.fillText("Tap to retry", 38, 130);
+        ctx.font = "16px monospace";
+        ctx.fillText("GAME OVER", 100, 220);
+        ctx.fillText("Tap to retry", 90, 240);
       }
     }
 
@@ -197,7 +195,7 @@
       } else {
         milk.isPonging = true;
         mom.active = true;
-        mom.x = -40;
+        mom.x = -60;
       }
     }
 
