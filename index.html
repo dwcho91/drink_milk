@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>드링크 밀크</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #fff6f0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: #ffebcc;
+      image-rendering: pixelated;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="160" height="240"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scale = 3;
+    canvas.style.width = canvas.width * scale + "px";
+    canvas.style.height = canvas.height * scale + "px";
+
+    const Drinkmilk_baby = new Image();
+    Drinkmilk_baby.src = "Drinkmilk_baby.png"; // 아기 이미지 파일명
+
+    const Drinkmilk_mom = new Image();
+    Drinkmilk_mom.src = "Drinkmilk_mom.png"; // 엄마 이미지 파일명
+
+    const milk = {
+      x: 70,
+      y: 200,
+      w: 20,
+      h: 20,
+      isPonging: false
+    };
+
+    const apples = [];
+    let gameOver = false;
+    let score = 0;
+    let lives = 3;
+    let pongZone = { y: 180, h: 20 };
+
+    const mom = {
+      x: -40,
+      y: pongZone.y,
+      w: 30,
+      h: 20,
+      vx: 20,
+      active: false
+    };
+
+    function resetGame() {
+      apples.length = 0;
+      score = 0;
+      lives = 3;
+      gameOver = false;
+      milk.y = 200;
+      milk.isPonging = false;
+      mom.active = false;
+      mom.x = -40;
+    }
+
+    function spawnApple() {
+      const isGood = Math.random() < 0.4;
+      const speed = 1 + Math.random() * 2.5;
+      apples.push({
+        x: 75,
+        y: 0,
+        w: 12,
+        h: 12,
+        speed,
+        ponged: false,
+        type: isGood ? "good" : "bad"
+      });
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      if (Math.random() < 0.02) spawnApple();
+
+      for (let apple of apples) {
+        apple.y += apple.speed;
+      }
+
+      if (mom.active) {
+        mom.x += mom.vx;
+        if (mom.x > canvas.width) {
+          mom.active = false;
+          mom.x = -40;
+        }
+      }
+
+      apples.forEach((apple, index) => {
+        if (
+          milk.isPonging &&
+          !apple.ponged &&
+          apple.y + apple.h > pongZone.y &&
+          apple.y < pongZone.y + pongZone.h
+        ) {
+          apple.speed = -2;
+          apple.ponged = true;
+          if (apple.type === "bad") {
+            score++;
+          }
+        }
+
+        if (
+          apple.type === "good" &&
+          !apple.ponged &&
+          apple.y + apple.h > milk.y &&
+          apple.y < milk.y + milk.h &&
+          apple.x + apple.w > milk.x &&
+          apple.x < milk.x + milk.w
+        ) {
+          apple.ponged = true;
+          score++;
+          apples.splice(index, 1);
+        } else if (
+          apple.type === "bad" &&
+          !apple.ponged &&
+          apple.y + apple.h > milk.y &&
+          apple.y < milk.y + milk.h &&
+          apple.x + apple.w > milk.x &&
+          apple.x < milk.x + milk.w
+        ) {
+          apple.ponged = true;
+          lives--;
+          if (lives <= 0) gameOver = true;
+          apples.splice(index, 1);
+        } else if (apple.y > canvas.height || apple.y + apple.h < 0) {
+          apples.splice(index, 1);
+        }
+      });
+
+      if (milk.isPonging) milk.isPonging = false;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffebcc";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 아기 그리기
+      if (Drinkmilk_baby.complete) {
+        ctx.drawImage(Drinkmilk_baby, milk.x, milk.y, milk.w, milk.h);
+      } else {
+        ctx.fillStyle = milk.isPonging ? "#cceeff" : "#ffffff";
+        ctx.fillRect(milk.x, milk.y, milk.w, milk.h);
+      }
+
+      for (let apple of apples) {
+        ctx.fillStyle = apple.type === "good" ? "#66cc66" : "#ff4d4d";
+        ctx.fillRect(apple.x, apple.y, apple.w, apple.h);
+      }
+
+      // 엄마 캐릭터 그리기
+      if (mom.active) {
+        if (Drinkmilk_mom.complete) {
+          ctx.drawImage(Drinkmilk_mom, mom.x, mom.y, mom.w, mom.h);
+        } else {
+          ctx.fillStyle = "#ff99cc";
+          ctx.fillRect(mom.x, mom.y, mom.w, mom.h);
+        }
+      }
+
+      ctx.fillStyle = "#333";
+      ctx.font = "10px monospace";
+      ctx.fillText(`Score: ${score}`, 10, 20);
+      ctx.fillText(`Lives: ${lives}`, 10, 35);
+
+      if (gameOver) {
+        ctx.fillStyle = "#d32f2f";
+        ctx.font = "12px monospace";
+        ctx.fillText("GAME OVER", 40, 110);
+        ctx.fillText("Tap to retry", 38, 130);
+      }
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function handlePong() {
+      if (gameOver) {
+        resetGame();
+      } else {
+        milk.isPonging = true;
+        mom.active = true;
+        mom.x = -40;
+      }
+    }
+
+    canvas.addEventListener("mousedown", handlePong);
+    canvas.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      handlePong();
+    }, { passive: false });
+
+    gameLoop();
+  </script>
+</body>
+</html>
