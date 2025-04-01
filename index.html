@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>슈퍼맘v5</title>
+  <title>슈퍼맘v6</title>
   <style>
     html, body {
       margin: 0;
@@ -45,22 +45,17 @@
   </style>
 </head>
 <body>
-  <button id="startButton">START</button>
+  <button id="startButton" style="display:none">START</button>
   <button id="restartButton">RESTART</button>
   <canvas id="gameCanvas" width="320" height="480"></canvas>
   <script>
     window.addEventListener("load", () => {
-      const loadImage = (img) => new Promise(resolve => {
-        if (img.complete) resolve();
-        else img.onload = resolve;
-      });
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
       const startButton = document.getElementById("startButton");
       const restartButton = document.getElementById("restartButton");
 
       let gameStarted = false;
-      startButton.style.display = "none";
       restartButton.style.display = "none";
 
       const Drinkmilk_baby = new Image();
@@ -75,14 +70,19 @@
       const Drinkmilk_bad = new Image();
       Drinkmilk_bad.src = "Drinkmilk_bad.png";
 
-      Promise.all([
-        loadImage(Drinkmilk_baby),
-        loadImage(Drinkmilk_mom),
-        loadImage(Drinkmilk_good),
-        loadImage(Drinkmilk_bad)
-      ]).then(() => {
-        startButton.style.display = "block";
-      });
+      let imagesLoaded = 0;
+      const totalImages = 4;
+      const checkAllImagesLoaded = () => {
+        imagesLoaded++;
+        if (imagesLoaded === totalImages) {
+          startButton.style.display = "block";
+        }
+      };
+
+      Drinkmilk_baby.onload = checkAllImagesLoaded;
+      Drinkmilk_mom.onload = checkAllImagesLoaded;
+      Drinkmilk_good.onload = checkAllImagesLoaded;
+      Drinkmilk_bad.onload = checkAllImagesLoaded;
 
       const milk = {
         x: 140,
@@ -202,21 +202,11 @@
         ctx.fillStyle = "#ffebcc";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (Drinkmilk_baby.complete) {
-          ctx.drawImage(Drinkmilk_baby, milk.x, milk.y, milk.w, milk.h);
-        } else {
-          ctx.fillStyle = milk.isPonging ? "#cceeff" : "#ffffff";
-          ctx.fillRect(milk.x, milk.y, milk.w, milk.h);
-        }
+        ctx.drawImage(Drinkmilk_baby, milk.x, milk.y, milk.w, milk.h);
 
         for (let apple of apples) {
           const img = apple.type === "good" ? Drinkmilk_good : Drinkmilk_bad;
-          if (img.complete) {
-            ctx.drawImage(img, apple.x, apple.y, apple.w, apple.h);
-          } else {
-            ctx.fillStyle = apple.type === "good" ? "#66cc66" : "#ff4d4d";
-            ctx.fillRect(apple.x, apple.y, apple.w, apple.h);
-          }
+          ctx.drawImage(img, apple.x, apple.y, apple.w, apple.h);
         }
 
         if (mom.active || gameOver) {
@@ -225,12 +215,7 @@
           const momW = gameOver ? 60 : mom.w;
           const momH = gameOver ? 40 : mom.h;
 
-          if (Drinkmilk_mom.complete) {
-            ctx.drawImage(Drinkmilk_mom, momX, momY, momW, momH);
-          } else {
-            ctx.fillStyle = "#ff99cc";
-            ctx.fillRect(momX, momY, momW, momH);
-          }
+          ctx.drawImage(Drinkmilk_mom, momX, momY, momW, momH);
         }
 
         ctx.fillStyle = "#333";
@@ -266,6 +251,7 @@
 
       restartButton.addEventListener("click", () => {
         resetGame();
+        gameStarted = true;
         restartButton.style.display = "none";
       });
 
