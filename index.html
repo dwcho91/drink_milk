@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>드링크 밀크</title>
+  <title>[MALONG]Drink Milk</title>
   <style>
     html, body {
       margin: 0;
@@ -17,6 +17,8 @@
       background: #ffebcc;
       image-rendering: pixelated;
       touch-action: manipulation;
+      width: 100%;
+      height: auto;
     }
   </style>
 </head>
@@ -25,9 +27,6 @@
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const scale = 3;
-    canvas.style.width = canvas.width * scale + "px";
-    canvas.style.height = canvas.height * scale + "px";
 
     const Drinkmilk_baby = new Image();
     Drinkmilk_baby.src = "Drinkmilk_baby.png"; // 아기 이미지 파일명
