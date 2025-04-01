@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>슈퍼맘v4</title>
+  <title>슈퍼맘v5</title>
   <style>
     html, body {
       margin: 0;
@@ -50,12 +50,18 @@
   <canvas id="gameCanvas" width="320" height="480"></canvas>
   <script>
     window.addEventListener("load", () => {
+      const loadImage = (img) => new Promise(resolve => {
+        if (img.complete) resolve();
+        else img.onload = resolve;
+      });
       const canvas = document.getElementById("gameCanvas");
       const ctx = canvas.getContext("2d");
       const startButton = document.getElementById("startButton");
       const restartButton = document.getElementById("restartButton");
 
       let gameStarted = false;
+      startButton.style.display = "none";
+      restartButton.style.display = "none";
 
       const Drinkmilk_baby = new Image();
       Drinkmilk_baby.src = "Drinkmilk_baby.png";
@@ -68,6 +74,15 @@
 
       const Drinkmilk_bad = new Image();
       Drinkmilk_bad.src = "Drinkmilk_bad.png";
+
+      Promise.all([
+        loadImage(Drinkmilk_baby),
+        loadImage(Drinkmilk_mom),
+        loadImage(Drinkmilk_good),
+        loadImage(Drinkmilk_bad)
+      ]).then(() => {
+        startButton.style.display = "block";
+      });
 
       const milk = {
         x: 140,
@@ -105,7 +120,7 @@
 
       function spawnApple() {
         const isGood = Math.random() < 0.4;
-        const speed = 1 + Math.random() * 2;
+        const speed = 1 + Math.random() * 2.5;
         apples.push({
           x: 150,
           y: 0,
