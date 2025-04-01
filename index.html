@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>말롱이</title>
+  <title>슈퍼맘</title>
   <style>
     html, body {
       margin: 0;
@@ -71,7 +71,7 @@
 
     function spawnApple() {
       const isGood = Math.random() < 0.4;
-      const speed = 1 + Math.random() * 2;
+      const speed = 1 + Math.random() * 2.5;
       apples.push({
         x: 150,
         y: 0,
@@ -161,12 +161,17 @@
         ctx.fillRect(apple.x, apple.y, apple.w, apple.h);
       }
 
-      if (mom.active) {
+      if (mom.active || gameOver) {
+        const momX = gameOver ? milk.x - 10 : mom.x;
+        const momY = gameOver ? milk.y - 30 : mom.y;
+        const momW = gameOver ? 60 : mom.w;
+        const momH = gameOver ? 40 : mom.h;
+
         if (Drinkmilk_mom.complete) {
-          ctx.drawImage(Drinkmilk_mom, mom.x, mom.y, mom.w, mom.h);
+          ctx.drawImage(Drinkmilk_mom, momX, momY, momW, momH);
         } else {
           ctx.fillStyle = "#ff99cc";
-          ctx.fillRect(mom.x, mom.y, mom.w, mom.h);
+          ctx.fillRect(momX, momY, momW, momH);
         }
       }
 
