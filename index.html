@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>슈퍼맘v2</title>
+  <title>슈퍼맘v3</title>
   <style>
     html, body {
       margin: 0;
@@ -21,207 +21,246 @@
       height: auto;
       max-width: 480px;
     }
+    #startButton, #restartButton {
+      position: absolute;
+      z-index: 10;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: sans-serif;
+    }
+    #startButton {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #restartButton {
+      top: 10px;
+      right: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
+  <button id="startButton">START</button>
+  <button id="restartButton">RESTART</button>
   <canvas id="gameCanvas" width="320" height="480"></canvas>
   <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    window.addEventListener("load", () => {
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const startButton = document.getElementById("startButton");
+      const restartButton = document.getElementById("restartButton");
 
-    const Drinkmilk_baby = new Image();
-    Drinkmilk_baby.src = "Drinkmilk_baby.png";
+      let gameStarted = false;
 
-    const Drinkmilk_mom = new Image();
-    Drinkmilk_mom.src = "Drinkmilk_mom.png";
+      const Drinkmilk_baby = new Image();
+      Drinkmilk_baby.src = "Drinkmilk_baby.png";
 
-    const Drinkmilk_good = new Image();
-    Drinkmilk_good.src = "Drinkmilk_good.png";
+      const Drinkmilk_mom = new Image();
+      Drinkmilk_mom.src = "Drinkmilk_mom.png";
 
-    const Drinkmilk_bad = new Image();
-    Drinkmilk_bad.src = "Drinkmilk_bad.png";
+      const Drinkmilk_good = new Image();
+      Drinkmilk_good.src = "Drinkmilk_good.png";
 
-    const milk = {
-      x: 140,
-      y: 400,
-      w: 40,
-      h: 40,
-      isPonging: false
-    };
+      const Drinkmilk_bad = new Image();
+      Drinkmilk_bad.src = "Drinkmilk_bad.png";
 
-    const apples = [];
-    let gameOver = false;
-    let score = 0;
-    let lives = 3;
-    let pongZone = { y: 360, h: 20 };
+      const milk = {
+        x: 140,
+        y: 400,
+        w: 40,
+        h: 40,
+        isPonging: false
+      };
 
-    const mom = {
-      x: -60,
-      y: pongZone.y,
-      w: 60,
-      h: 40,
-      vx: 25,
-      active: false
-    };
+      const apples = [];
+      let gameOver = false;
+      let score = 0;
+      let lives = 3;
+      let pongZone = { y: 360, h: 20 };
 
-    function resetGame() {
-      apples.length = 0;
-      score = 0;
-      lives = 3;
-      gameOver = false;
-      milk.y = 400;
-      milk.isPonging = false;
-      mom.active = false;
-      mom.x = -60;
-    }
+      const mom = {
+        x: -60,
+        y: pongZone.y,
+        w: 60,
+        h: 40,
+        vx: 25,
+        active: false
+      };
 
-    function spawnApple() {
-      const isGood = Math.random() < 0.4;
-      const speed = 1 + Math.random() * 2.5;
-      apples.push({
-        x: 150,
-        y: 0,
-        w: 20,
-        h: 20,
-        speed,
-        ponged: false,
-        type: isGood ? "good" : "bad"
-      });
-    }
-
-    function update() {
-      if (gameOver) return;
-      if (Math.random() < 0.02) spawnApple();
-
-      for (let apple of apples) {
-        apple.y += apple.speed;
+      function resetGame() {
+        apples.length = 0;
+        score = 0;
+        lives = 3;
+        gameOver = false;
+        milk.y = 400;
+        milk.isPonging = false;
+        mom.active = false;
+        mom.x = -60;
       }
 
-      if (mom.active) {
-        mom.x += mom.vx;
-        if (mom.x > canvas.width) {
-          mom.active = false;
-          mom.x = -60;
+      function spawnApple() {
+        const isGood = Math.random() < 0.4;
+        const speed = 1 + Math.random() * 2.5;
+        apples.push({
+          x: 150,
+          y: 0,
+          w: 20,
+          h: 20,
+          speed,
+          ponged: false,
+          type: isGood ? "good" : "bad"
+        });
+      }
+
+      function update() {
+        if (!gameStarted || gameOver) return;
+        if (Math.random() < 0.02) spawnApple();
+
+        for (let apple of apples) {
+          apple.y += apple.speed;
         }
-      }
 
-      apples.forEach((apple, index) => {
-        if (
-          milk.isPonging &&
-          !apple.ponged &&
-          apple.y + apple.h > pongZone.y &&
-          apple.y < pongZone.y + pongZone.h
-        ) {
-          apple.speed = -2;
-          apple.ponged = true;
-          if (apple.type === "bad") {
-            score++;
+        if (mom.active) {
+          mom.x += mom.vx;
+          if (mom.x > canvas.width) {
+            mom.active = false;
+            mom.x = -60;
           }
         }
 
-        if (
-          apple.type === "good" &&
-          !apple.ponged &&
-          apple.y + apple.h > milk.y &&
-          apple.y < milk.y + milk.h &&
-          apple.x + apple.w > milk.x &&
-          apple.x < milk.x + milk.w
-        ) {
-          apple.ponged = true;
-          score++;
-          apples.splice(index, 1);
-        } else if (
-          apple.type === "bad" &&
-          !apple.ponged &&
-          apple.y + apple.h > milk.y &&
-          apple.y < milk.y + milk.h &&
-          apple.x + apple.w > milk.x &&
-          apple.x < milk.x + milk.w
-        ) {
-          apple.ponged = true;
-          lives--;
-          if (lives <= 0) gameOver = true;
-          apples.splice(index, 1);
-        } else if (apple.y > canvas.height || apple.y + apple.h < 0) {
-          apples.splice(index, 1);
-        }
-      });
+        apples.forEach((apple, index) => {
+          if (
+            milk.isPonging &&
+            !apple.ponged &&
+            apple.y + apple.h > pongZone.y &&
+            apple.y < pongZone.y + pongZone.h
+          ) {
+            apple.speed = -2;
+            apple.ponged = true;
+            if (apple.type === "bad") {
+              score++;
+            }
+          }
 
-      if (milk.isPonging) milk.isPonging = false;
-    }
+          if (
+            apple.type === "good" &&
+            !apple.ponged &&
+            apple.y + apple.h > milk.y &&
+            apple.y < milk.y + milk.h &&
+            apple.x + apple.w > milk.x &&
+            apple.x < milk.x + milk.w
+          ) {
+            apple.ponged = true;
+            score++;
+            apples.splice(index, 1);
+          } else if (
+            apple.type === "bad" &&
+            !apple.ponged &&
+            apple.y + apple.h > milk.y &&
+            apple.y < milk.y + milk.h &&
+            apple.x + apple.w > milk.x &&
+            apple.x < milk.x + milk.w
+          ) {
+            apple.ponged = true;
+            lives--;
+            if (lives <= 0) {
+              gameOver = true;
+              restartButton.style.display = "block";
+            }
+            apples.splice(index, 1);
+          } else if (apple.y > canvas.height || apple.y + apple.h < 0) {
+            apples.splice(index, 1);
+          }
+        });
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#ffebcc";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      if (Drinkmilk_baby.complete) {
-        ctx.drawImage(Drinkmilk_baby, milk.x, milk.y, milk.w, milk.h);
-      } else {
-        ctx.fillStyle = milk.isPonging ? "#cceeff" : "#ffffff";
-        ctx.fillRect(milk.x, milk.y, milk.w, milk.h);
+        if (milk.isPonging) milk.isPonging = false;
       }
 
-      for (let apple of apples) {
-        const img = apple.type === "good" ? Drinkmilk_good : Drinkmilk_bad;
-        if (img.complete) {
-          ctx.drawImage(img, apple.x, apple.y, apple.w, apple.h);
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffebcc";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (Drinkmilk_baby.complete) {
+          ctx.drawImage(Drinkmilk_baby, milk.x, milk.y, milk.w, milk.h);
         } else {
-          ctx.fillStyle = apple.type === "good" ? "#66cc66" : "#ff4d4d";
-          ctx.fillRect(apple.x, apple.y, apple.w, apple.h);
+          ctx.fillStyle = milk.isPonging ? "#cceeff" : "#ffffff";
+          ctx.fillRect(milk.x, milk.y, milk.w, milk.h);
+        }
+
+        for (let apple of apples) {
+          const img = apple.type === "good" ? Drinkmilk_good : Drinkmilk_bad;
+          if (img.complete) {
+            ctx.drawImage(img, apple.x, apple.y, apple.w, apple.h);
+          } else {
+            ctx.fillStyle = apple.type === "good" ? "#66cc66" : "#ff4d4d";
+            ctx.fillRect(apple.x, apple.y, apple.w, apple.h);
+          }
+        }
+
+        if (mom.active || gameOver) {
+          const momX = gameOver ? milk.x - 10 : mom.x;
+          const momY = gameOver ? milk.y - 30 : mom.y;
+          const momW = gameOver ? 60 : mom.w;
+          const momH = gameOver ? 40 : mom.h;
+
+          if (Drinkmilk_mom.complete) {
+            ctx.drawImage(Drinkmilk_mom, momX, momY, momW, momH);
+          } else {
+            ctx.fillStyle = "#ff99cc";
+            ctx.fillRect(momX, momY, momW, momH);
+          }
+        }
+
+        ctx.fillStyle = "#333";
+        ctx.font = "14px monospace";
+        ctx.fillText(`Score: ${score}`, 10, 20);
+        ctx.fillText(`Lives: ${lives}`, 10, 40);
+
+        if (gameOver) {
+          ctx.fillStyle = "#d32f2f";
+          ctx.font = "16px monospace";
+          ctx.fillText("GAME OVER", 100, 220);
         }
       }
 
-      if (mom.active || gameOver) {
-        const momX = gameOver ? milk.x - 10 : mom.x;
-        const momY = gameOver ? milk.y - 30 : mom.y;
-        const momW = gameOver ? 60 : mom.w;
-        const momH = gameOver ? 40 : mom.h;
-
-        if (Drinkmilk_mom.complete) {
-          ctx.drawImage(Drinkmilk_mom, momX, momY, momW, momH);
-        } else {
-          ctx.fillStyle = "#ff99cc";
-          ctx.fillRect(momX, momY, momW, momH);
-        }
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
       }
 
-      ctx.fillStyle = "#333";
-      ctx.font = "14px monospace";
-      ctx.fillText(`Score: ${score}`, 10, 20);
-      ctx.fillText(`Lives: ${lives}`, 10, 40);
-
-      if (gameOver) {
-        ctx.fillStyle = "#d32f2f";
-        ctx.font = "16px monospace";
-        ctx.fillText("GAME OVER", 100, 220);
-        ctx.fillText("Tap to retry", 90, 240);
-      }
-    }
-
-    function gameLoop() {
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
-
-    function handlePong() {
-      if (gameOver) {
-        resetGame();
-      } else {
+      function handlePong() {
+        if (!gameStarted || gameOver) return;
         milk.isPonging = true;
         mom.active = true;
         mom.x = -60;
       }
-    }
 
-    canvas.addEventListener("mousedown", handlePong);
-    canvas.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      handlePong();
-    }, { passive: false });
+      startButton.addEventListener("click", () => {
+        gameStarted = true;
+        startButton.style.display = "none";
+        resetGame();
+      });
 
-    gameLoop();
+      restartButton.addEventListener("click", () => {
+        resetGame();
+        restartButton.style.display = "none";
+      });
+
+      canvas.addEventListener("mousedown", handlePong);
+      canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        handlePong();
+      }, { passive: false });
+
+      gameLoop();
+    });
   </script>
 </body>
 </html>
