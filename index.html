@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>슈퍼맘v6</title>
+  <title>슈퍼맘v7</title>
   <style>
     html, body {
       margin: 0;
@@ -120,12 +120,12 @@
 
       function spawnApple() {
         const isGood = Math.random() < 0.4;
-        const speed = 1 + Math.random() * 2.5;
+        const speed = 1 + Math.random() * 2;
         apples.push({
           x: 150,
           y: 0,
-          w: 20,
-          h: 20,
+          w: 35,
+          h: 35,
           speed,
           ponged: false,
           type: isGood ? "good" : "bad"
