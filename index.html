@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>슈퍼맘v3</title>
+  <title>슈퍼맘v4</title>
   <style>
     html, body {
       margin: 0;
@@ -105,7 +105,7 @@
 
       function spawnApple() {
         const isGood = Math.random() < 0.4;
-        const speed = 1 + Math.random() * 2.5;
+        const speed = 1 + Math.random() * 2;
         apples.push({
           x: 150,
           y: 0,
@@ -182,6 +182,7 @@
       }
 
       function draw() {
+        if (!gameStarted) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#ffebcc";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -243,9 +244,9 @@
       }
 
       startButton.addEventListener("click", () => {
+        resetGame();
         gameStarted = true;
         startButton.style.display = "none";
-        resetGame();
       });
 
       restartButton.addEventListener("click", () => {
